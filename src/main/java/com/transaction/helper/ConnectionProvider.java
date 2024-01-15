@@ -14,7 +14,6 @@ public class ConnectionProvider {
         if (Objects.isNull(connection)){
             try{
                 connection=DriverManager.getConnection(Constant.DATABASE_URL,Constant.DATABASE_USERNAME,Constant.DATABASE_PASSWORD);
-                System.out.println("success");
             }catch (SQLException e){
                 e.printStackTrace();
             }

@@ -22,6 +22,15 @@ public class Customer {
         this.contactNumber = contactNumber;
     }
 
+    public Customer(String firstName, String lastName, String city, String state, String address, String contactNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.city = city;
+        this.state = state;
+        this.address = address;
+        this.contactNumber = contactNumber;
+    }
+
     public Integer getCustomerId() {
         return customerId;
     }
@@ -78,5 +87,15 @@ public class Customer {
         this.contactNumber = contactNumber;
     }
 
-
+    @Override
+    public String toString() {
+        return "Customer = ( " +
+                "CUSTOMER_ID = " + customerId +
+                "\nFIRST_NAME = " + firstName  +
+                "\nLAST_NAME = " + lastName +
+                "\nCITY = " + city +
+                "\nSTATE = " + state +
+                "\nADDRESS = " + address +
+                "\nCONTACT_NUMBER = " + contactNumber + ")";
+    }
 }

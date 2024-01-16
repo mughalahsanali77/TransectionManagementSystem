@@ -1,7 +1,7 @@
 package com.transaction.dao;
 
 import com.transaction.bean.Customer;
-import com.transaction.helper.ConnectionProvider;
+import com.transaction.util.ConnectionProvider;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,17 +13,9 @@ public class CustomerDao {
         String sql = "INSERT INTO CUSTOMER (FIRST_NAME, LAST_NAME, CITY, STATE, ADDRESS, CONTACT_NUMBER) VALUES (?,?,?,?,?,?)";
         try (Connection connection = ConnectionProvider.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-
-            preparedStatement.setString(1, customer.getFirstName());
-            preparedStatement.setString(2, customer.getLastName());
-            preparedStatement.setString(3, customer.getCity());
-            preparedStatement.setString(4, customer.getState());
-            preparedStatement.setString(5, customer.getAddress());
-            preparedStatement.setString(6, customer.getContactNumber());
-
+            setCustomerParameters(preparedStatement, customer);
             // Execute the insert statement
             int rowsAffected = preparedStatement.executeUpdate();
-
             if (rowsAffected > 0) {
                 // Get the generated keys (including auto-generated CUSTOMER_ID)
                 ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
@@ -38,10 +30,12 @@ public class CustomerDao {
             } else {
                 throw new SQLException("Failed to insert customer.");
             }
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error occurred: " + e.getMessage());
+
             return null;
+        } finally {
+            ConnectionProvider.closeConnection();
         }
     }
 
@@ -52,20 +46,90 @@ public class CustomerDao {
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
             while (resultSet.next()) {
-                Customer customer = new Customer(
-                        resultSet.getInt("CUSTOMER_ID"),
-                        resultSet.getString("FIRST_NAME"),
-                        resultSet.getString("LAST_NAME"),
-                        resultSet.getString("CITY"),
-                        resultSet.getString("STATE"),
-                        resultSet.getString("ADDRESS"),
-                        resultSet.getString("CONTACT_NUMBER"));
+                Customer customer = createCustomerFromResultSet(resultSet);
                 listOfCustomers.add(customer);
             }
         } catch (SQLException s) {
-            s.printStackTrace();
+            System.err.println("Error occurred: " + s.getMessage());
+
+        } finally {
+            ConnectionProvider.closeConnection();
         }
         return listOfCustomers;
     }
 
+    public static Customer getById(Integer id) {
+        String sql = "SELECT CUSTOMER_ID,FIRST_NAME,LAST_NAME,CITY,STATE,ADDRESS,CONTACT_NUMBER FROM CUSTOMER WHERE CUSTOMER_ID =?";
+        Customer customer = null;
+        try (Connection connection = ConnectionProvider.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                customer = createCustomerFromResultSet(resultSet);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error occurred: " + e.getMessage());
+        } finally {
+            ConnectionProvider.closeConnection();
+        }
+        return customer;
+    }
+
+
+    public static void delete(Integer id) {
+        String sql = "DELETE FROM CUSTOMER WHERE CUSTOMER_ID = ?";
+        try (Connection connection = ConnectionProvider.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, id);
+            int i = preparedStatement.executeUpdate();
+            if (i<=0){
+                throw new SQLException("Failed to delete");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error occurred: " + e.getMessage());
+        } finally {
+            ConnectionProvider.closeConnection();
+        }
+    }
+
+    public static Customer update(Customer customer, Integer id) {
+        String sql = "UPDATE CUSTOMER SET FIRST_NAME=?,LAST_NAME=?,CITY=?,STATE=?,ADDRESS=?,CONTACT_NUMBER=? WHERE CUSTOMER_ID=?";
+        try (Connection connection = ConnectionProvider.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            setCustomerParameters(preparedStatement, customer);
+            preparedStatement.setInt(7, id);
+            int i = preparedStatement.executeUpdate();
+            if (i>0){
+                customer.setCustomerId(id);
+            }else {
+                throw new SQLException("Failed to Update");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error occurred :" + e.getMessage());
+            customer=null;
+        }finally {
+            ConnectionProvider.closeConnection();
+        }
+        return customer;
+    }
+
+    private static void setCustomerParameters(PreparedStatement preparedStatement, Customer customer) throws SQLException {
+        preparedStatement.setString(1, customer.getFirstName());
+        preparedStatement.setString(2, customer.getLastName());
+        preparedStatement.setString(3, customer.getCity());
+        preparedStatement.setString(4, customer.getState());
+        preparedStatement.setString(5, customer.getAddress());
+        preparedStatement.setString(6, customer.getContactNumber());
+    }
+
+    private static Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
+        return new Customer(
+                resultSet.getInt("CUSTOMER_ID"),
+                resultSet.getString("FIRST_NAME"),
+                resultSet.getString("LAST_NAME"),
+                resultSet.getString("CITY"),
+                resultSet.getString("STATE"),
+                resultSet.getString("ADDRESS"),
+                resultSet.getString("CONTACT_NUMBER")
+        );
+    }
 }

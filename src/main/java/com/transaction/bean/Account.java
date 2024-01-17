@@ -69,4 +69,23 @@ public class Account {
     public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
+
+    @Override
+    public String toString() {
+        String stars="";
+        if (pinCode!=null){
+            for (int i=0;i<pinCode.toString().length();i++){
+                stars+="*";
+            }
+        }
+
+
+        return "ACCOUNT_DETAIL (" +
+                "\nACCOUNT_NO = " + accountNo +
+                "\nPIN_CODE = " + stars +
+                "\nDATE_OF_CREATE = " + dateOfCreate +
+                "\nACCOUNT_TYPE = " + accountType +
+                "\nAMOUNT = " + amount +
+                "\nCUSTOMER_ID = " + customerId + ")";
+    }
 }

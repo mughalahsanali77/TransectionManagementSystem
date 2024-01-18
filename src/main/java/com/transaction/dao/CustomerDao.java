@@ -174,7 +174,7 @@ public class CustomerDao {
         preparedStatement.setString(6, customer.getContactNumber());
     }
 
-    private static Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
+    public static Customer createCustomerFromResultSet(ResultSet resultSet) throws SQLException {
         return new Customer(
                 resultSet.getInt("CUSTOMER_ID"),
                 resultSet.getString("FIRST_NAME"),

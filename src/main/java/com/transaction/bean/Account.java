@@ -1,6 +1,10 @@
 package com.transaction.bean;
 
+import com.mysql.cj.util.StringUtils;
+import com.transaction.util.Utils;
+
 import java.util.Date;
+import java.util.Objects;
 
 public class Account {
     private String accountNo;
@@ -8,18 +12,46 @@ public class Account {
     private Date dateOfCreate;
     private String accountType;
     private Long amount;
-    private Integer customerId;
+    //private Integer customerId;
 
+    private Customer customer;
     public Account() {
     }
 
+    public Account(String accountNo, Integer pinCode, Date dateOfCreate, String accountType, Long amount, Customer customer) {
+        this.accountNo = accountNo;
+        this.pinCode = pinCode;
+        this.dateOfCreate = dateOfCreate;
+        this.accountType = accountType;
+        this.amount = amount;
+        this.customer=customer;
+    }
     public Account(String accountNo, Integer pinCode, Date dateOfCreate, String accountType, Long amount, Integer customerId) {
         this.accountNo = accountNo;
         this.pinCode = pinCode;
         this.dateOfCreate = dateOfCreate;
         this.accountType = accountType;
         this.amount = amount;
-        this.customerId = customerId;
+        if (Objects.nonNull(customerId)){
+            Customer customer=new Customer();
+            customer.setCustomerId(customerId);
+            this.customer=customer;
+        }
+    }
+
+    public Account(String accountNo, Integer pinCode, Customer customer,String accountType) {
+        this.accountNo = accountNo;
+        this.pinCode = pinCode;
+        this.customer = customer;
+        this.accountType=accountType;
+    }
+
+    public Account(String accountNo, Integer pinCode, Date dateOfCreate, String accountType, Long amount) {
+        this.accountNo = accountNo;
+        this.pinCode = pinCode;
+        this.dateOfCreate = dateOfCreate;
+        this.accountType = accountType;
+        this.amount = amount;
     }
 
     public String getAccountNo() {
@@ -62,30 +94,38 @@ public class Account {
         this.amount = amount;
     }
 
-    public Integer getCustomerId() {
-        return customerId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setCustomerId(Integer customerId) {
-        this.customerId = customerId;
+    public void setCustomerId(Customer customer) {
+        this.customer = customer;
     }
 
+    public String getAccountNoPinCodeCustomer(){
+        return "ACCOUNT DETAILS ("+
+                "\nACCOUNT_NO = "+accountNo+
+                "\nPIN_CODE = "+Utils.getPinCodeStarts(pinCode)+
+                "\nCUSTOMER = "+customer.getFirstName()+
+                "\nACCOUNT_TYPE = "+accountType;
+    }
     @Override
     public String toString() {
-        String stars="";
-        if (pinCode!=null){
-            for (int i=0;i<pinCode.toString().length();i++){
-                stars+="*";
-            }
-        }
-
-
         return "ACCOUNT_DETAIL (" +
                 "\nACCOUNT_NO = " + accountNo +
-                "\nPIN_CODE = " + stars +
+                "\nPIN_CODE = " + Utils.getPinCodeStarts(pinCode) +
                 "\nDATE_OF_CREATE = " + dateOfCreate +
                 "\nACCOUNT_TYPE = " + accountType +
                 "\nAMOUNT = " + amount +
-                "\nCUSTOMER_ID = " + customerId + ")";
+                "\nCUSTOMER = " + customer+ ")";
+    }
+    public String toStringWithCustomerId() {
+        return "ACCOUNT_DETAIL (" +
+                "\nACCOUNT_NO = " + accountNo +
+                "\nPIN_CODE = " + Utils.getPinCodeStarts(pinCode) +
+                "\nDATE_OF_CREATE = " + dateOfCreate +
+                "\nACCOUNT_TYPE = " + accountType +
+                "\nAMOUNT = " + amount +
+                "\nCUSTOMER = " + customer.getCustomerId()+ ")";
     }
 }

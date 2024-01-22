@@ -1,11 +1,13 @@
 package com.transaction.serviceImpl;
 
 import com.transaction.bean.Customer;
+import com.transaction.common.bean.ResponseBean;
 import com.transaction.common.dto.PaginationRequest;
 import com.transaction.common.dto.PaginationResponse;
 import com.transaction.common.exception.CustomerException;
 import com.transaction.dao.CustomerDao;
 import com.transaction.service.CustomerService;
+import com.transaction.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,52 +15,103 @@ import java.util.Objects;
 public class CustomerServiceImpl implements CustomerService {
 
     @Override
-    public Customer create(Customer customer) {
+    public ResponseBean<Customer> create(Customer customer) {
+        try {
+            validateCustomer(customer);
+            Customer inserted = CustomerDao.create(customer);
+            return new ResponseBean<>(0, "Success", inserted);
+        } catch (CustomerException e) {
+            return new ResponseBean<>(1, e.getMessage());
+        } catch (Exception e) {
+            return new ResponseBean<>(1, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBean<Customer> update(Customer customer, Integer id) {
+        try {
+            if (Objects.isNull(id))
+                throw new CustomerException("Id cannot be null , to check existing record");
+            Customer byId = CustomerDao.getById(id);
+            if (Objects.isNull(byId))
+                throw new CustomerException("Record not found with given id");
+            validateCustomer(customer);
+            Customer update = CustomerDao.update(customer, id);
+            return new ResponseBean<>(0, "Success", update);
+        } catch (CustomerException e) {
+            return new ResponseBean<>(1, e.getMessage());
+        } catch (Exception e) {
+            return new ResponseBean<>(1, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBean<Customer> delete(Integer id) {
+        try {
+            if (Objects.isNull(id))
+                throw new CustomerException("Id cannot be null");
+            Customer customer = CustomerDao.getById(id);
+            if (Objects.isNull(customer))
+                throw new CustomerException("Customer Not Found with given Id");
+            CustomerDao.delete(id);
+            return new ResponseBean<>(0, "Success", customer);
+        } catch (CustomerException e) {
+            return new ResponseBean<>(1, e.getMessage());
+        } catch (Exception e) {
+            return new ResponseBean<>(1, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBean<Customer> getById(Integer id) {
+        try {
+            if (Objects.isNull(id))
+                throw new CustomerException("id cannot be null");
+            Customer customer = CustomerDao.getById(id);
+            return new ResponseBean<>(0, "Success", customer);
+        } catch (CustomerException e) {
+            return new ResponseBean<>(1, e.getMessage());
+        } catch (Exception e) {
+            return new ResponseBean<>(1, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBean<List<Customer>> get() {
+        try {
+            List<Customer> customers = CustomerDao.getAll();
+            return new ResponseBean<>(0, "Success", customers);
+        } catch (Exception e) {
+            return new ResponseBean<>(1, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseBean<PaginationResponse> get(PaginationRequest paginationRequest) {
+        try {
+            PaginationResponse paginationResponse = CustomerDao.getAllWithPagination(paginationRequest);
+            return new ResponseBean<>(0, "Success", paginationResponse);
+        } catch (CustomerException e) {
+            return new ResponseBean<>(1, e.getMessage());
+        } catch (Exception e) {
+            return new ResponseBean<>(1, e.getMessage());
+        }
+    }
+
+    private void validateCustomer(Customer customer) {
         if (Objects.isNull(customer))
             throw new CustomerException("Customer cannot be null");
-        Customer inserted= CustomerDao.create(customer);
-        return inserted;
+        if (StringUtils.isEmptyOrNull(customer.getContactNumber()))
+            throw new CustomerException("First Name  cannot be Null");
+        if (StringUtils.isEmptyOrNull(customer.getLastName()))
+            throw new CustomerException("Last cannot be null");
+        if (StringUtils.isEmptyOrNull(customer.getAddress()))
+            throw new CustomerException("Address cannot be null");
+        if (StringUtils.isEmptyOrNull(customer.getCity()))
+            throw new CustomerException("city cannot be null");
+        if (StringUtils.isEmptyOrNull(customer.getState()))
+            throw new CustomerException("State cannot be null");
+        if (StringUtils.isEmptyOrNull(customer.getContactNumber()))
+            throw new CustomerException("contact number cannot be null");
     }
-
-    @Override
-    public Customer update(Customer customer, Integer customerId) {
-        if (Objects.isNull(customer) || Objects.isNull(customerId))
-            throw new CustomerException("Customer or Customer id cannot be null");
-        Customer found=CustomerDao.getById(customerId);
-        if (Objects.isNull(found)){
-            throw new CustomerException("Customer not found with given id");
-        }
-        return CustomerDao.update(customer,customerId);
-    }
-
-    @Override
-    public Customer delete(Integer id) {
-        Customer customer=getById(id);
-        if (Objects.nonNull(customer)){
-            CustomerDao.delete(id);
-        }
-        return customer;
-    }
-
-    @Override
-    public Customer getById(Integer id) {
-        if (Objects.isNull(id))
-            throw new CustomerException("id cannot be null");
-        Customer customer=CustomerDao.getById(id);
-        if (Objects.isNull(customer))
-            throw new CustomerException("Customer Not Found With given id");
-        return customer;
-    }
-
-    @Override
-    public List<Customer> get() {
-        return CustomerDao.getAll();
-    }
-
-    @Override
-    public PaginationResponse get(PaginationRequest paginationRequest) {
-        PaginationResponse response= CustomerDao.getAllWithPagination(paginationRequest);
-        return response;
-    }
-
 }

@@ -1,16 +1,16 @@
 package com.transaction.common.bean;
 
-public class ResponseBean {
+public class ResponseBean<T> {
     private Integer code;
     private String message;
-    private Object data;
+    private T data;
 
     public ResponseBean(Integer code, String message) {
         this.code = code;
         this.message = message;
     }
 
-    public ResponseBean(Integer code, String message, Object data) {
+    public ResponseBean(Integer code, String message, T data) {
         this.code = code;
         this.message = message;
         this.data = data;
@@ -32,11 +32,11 @@ public class ResponseBean {
         this.message = message;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 }

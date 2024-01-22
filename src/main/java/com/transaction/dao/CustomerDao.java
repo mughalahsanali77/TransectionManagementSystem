@@ -1,7 +1,8 @@
 package com.transaction.dao;
 
 import com.transaction.bean.Customer;
-import com.transaction.common.PaginationRequest;
+import com.transaction.common.dto.PaginationRequest;
+import com.transaction.common.dto.PaginationResponse;
 import com.transaction.util.ConnectionProvider;
 import java.sql.*;
 import java.util.ArrayList;
@@ -112,12 +113,12 @@ public class CustomerDao {
         return customer;
     }
 
-    public static List<Customer> getAllWithPagination(PaginationRequest page){
+    public static PaginationResponse getAllWithPagination(PaginationRequest page){
         List<Customer> customers=new ArrayList<>();
         Integer totalPages=totalPages(getTotalRecords(),page.getItemsPerPage());
         if (page.getCurrentPage()>totalPages){
             System.err.println("CURRENT PAGE IS GREATER THEN THE COUNT OF TOTAL PAGES\nONLY "+totalPages+" EXIST");
-            return customers;
+            return null;
         }else {
             Integer offset=page.getCurrentPage()*page.getItemsPerPage();
             String sql="SELECT CUSTOMER_ID,FIRST_NAME,LAST_NAME,CITY,STATE,ADDRESS,CONTACT_NUMBER " +
@@ -133,13 +134,15 @@ public class CustomerDao {
                     Customer customer=createCustomerFromResultSet(resultSet);
                     customers.add(customer);
                 }
+                return  new PaginationResponse(getTotalRecords().longValue(),totalPages,customers);
             }catch (SQLException e) {
                 System.err.println("Error occurred : " + e.getMessage());
+                return null;
             }finally {
                 ConnectionProvider.closeConnection();
             }
         }
-        return customers;
+
     }
 
     private static Integer totalPages(Integer totalRecords,Integer itemsPerPage){

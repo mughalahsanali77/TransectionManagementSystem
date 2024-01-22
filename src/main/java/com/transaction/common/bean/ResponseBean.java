@@ -1,4 +1,4 @@
-package com.transaction.common;
+package com.transaction.common.bean;
 
 public class ResponseBean {
     private Integer code;

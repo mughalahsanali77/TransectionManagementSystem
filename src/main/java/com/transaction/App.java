@@ -1,22 +1,15 @@
 package com.transaction;
 
 import com.transaction.bean.Account;
-import com.transaction.bean.Customer;
-import com.transaction.common.PaginationRequest;
 import com.transaction.dao.AccountDao;
-import com.transaction.dao.CustomerDao;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Hello world!
- *
  */
-public class App 
-{
-    public static void main( String[] args ) {
+public class App {
+    public static void main(String[] args) {
 //     List<Customer> customers=CustomerDao.getAll();
 //     for (Customer customer:customers){
 //         System.out.println(customer);
@@ -44,10 +37,10 @@ public class App
 //            System.out.println(account.toString());
 
         ///after using join
-//        Account account=AccountDao.getAccountByAccountNoAndPinCode("ACCOUNT-1",1234);
-//        if (Objects.nonNull(account)){
-//            System.out.println(account.getAccountNoPinCodeCustomer());
-//        }
+        Account account=AccountDao.getAccountByAccountNoAndPinCode("ACCOUNT-1",1234);
+        if (Objects.nonNull(account)){
+            System.out.println(account.getAccountNoPinCodeCustomer());
+        }
 
 //        Account account=AccountDao.getByAccountNumber("ACCOUNT-1");
 //        if (Objects.nonNull(account)){
@@ -66,6 +59,19 @@ public class App
 //        for (Account account:accounts){
 //            System.out.println("-------------------------------------");
 //            System.out.println(account.toString());
+//            System.out.println("-------------------------------------");
+//        }
+//
+//        Customer customer = CustomerDao.getById(3);
+//        if (Objects.nonNull(customer)) {
+//            System.out.println(customer);
+//
+//            Account account = AccountDao.create(new Account("ACCOUNT-1", 1234, new Date(), "CURRENT", 2000L, customer));
+//            if (Objects.nonNull(account)) {
+//        List<Account> accounts = AccountDao.getAllAccountsWithCustomersDetails();
+//        for (Account acc : accounts) {
+//            System.out.println("-------------------------------------");
+//            System.out.println(acc.toString());
 //            System.out.println("-------------------------------------");
 //        }
 

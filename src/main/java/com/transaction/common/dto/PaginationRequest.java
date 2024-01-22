@@ -1,4 +1,4 @@
-package com.transaction.common;
+package com.transaction.common.dto;
 
 public class PaginationRequest {
     private Integer itemsPerPage;

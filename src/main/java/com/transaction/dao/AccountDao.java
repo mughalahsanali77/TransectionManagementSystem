@@ -40,7 +40,7 @@ public class AccountDao {
                         resultSet.getString("ACCOUNT_TYPE"),
                         resultSet.getLong("AMOUNT"),
                         resultSet.getInt("CUSTOMER_ID")
-                        );
+                );
                 accounts.add(account);
             }
         }catch (SQLException e){
@@ -58,8 +58,8 @@ public class AccountDao {
                 "JOIN CUSTOMER C " +
                 "WHERE A.CUSTOMER_ID=C.CUSTOMER_ID";
         try (Connection connection=ConnectionProvider.getConnection();
-        Statement statement=connection.createStatement();
-        ResultSet resultSet=statement.executeQuery(sql)){
+             Statement statement=connection.createStatement();
+             ResultSet resultSet=statement.executeQuery(sql)){
             while (resultSet.next()){
                 Account account=getAccountFromResultSet(resultSet);
                 accounts.add(account);
@@ -82,7 +82,7 @@ public class AccountDao {
                 "ON A.CUSTOMER_ID = C.CUSTOMER_ID " +
                 "WHERE A.ACCOUNT_NO = ?";
         try(Connection connection=ConnectionProvider.getConnection();
-        PreparedStatement preparedStatement= connection.prepareStatement(sql)) {
+            PreparedStatement preparedStatement= connection.prepareStatement(sql)) {
             preparedStatement.setString(1,accountNo);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()){
@@ -131,20 +131,39 @@ public class AccountDao {
                 "ON C.CUSTOMER_ID = A.CUSTOMER_ID " +
                 "WHERE ACCOUNT_NO=? AND PIN_CODE=? ";
         try(Connection connection=ConnectionProvider.getConnection();
-        PreparedStatement preparedStatement=connection.prepareStatement(sql)) {
+            PreparedStatement preparedStatement=connection.prepareStatement(sql)) {
             preparedStatement.setString(1,accountNo);
             preparedStatement.setInt(2,pinCode);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()){
                 Customer customer=new Customer();
                 customer.setFirstName(resultSet.getString("FIRST_NAME"));
-              return   new Account(resultSet.getString("ACCOUNT_NO"),resultSet.getInt("PIN_CODE"),customer,resultSet.getString("ACCOUNT_TYPE"));
+                return   new Account(resultSet.getString("ACCOUNT_NO"),resultSet.getInt("PIN_CODE"),customer,resultSet.getString("ACCOUNT_TYPE"));
             }else {
                 System.err.println("ACCOUNT NOT FOUND WITH GIVEN NUMBER AND PIN CODE");
                 return null;
             }
         }catch (SQLException e){
             System.err.println("ERROR OCCURRED : "+e.getMessage());
+            return null;
+        }finally {
+            ConnectionProvider.closeConnection();
+        }
+    }
+    public static Account deleteAccount(Account account){
+        String sql="DELETE FROM ACCOUNT WHERE ACCOUNT_NO=?";
+        try (PreparedStatement preparedStatement=ConnectionProvider.getConnection().prepareStatement(sql)){
+            preparedStatement.setString(1,account.getAccountNo());
+            int rowsEffected = preparedStatement.executeUpdate();
+            if (rowsEffected>0){
+                System.out.println("Success");
+                return account;
+            }else {
+                System.err.println("Error"+preparedStatement.toString());
+                return  null;
+            }
+        }catch (SQLException e){
+            System.err.println("Error occurred : "+e.getMessage());
             return null;
         }finally {
             ConnectionProvider.closeConnection();

@@ -4,7 +4,7 @@ import com.transaction.bean.Customer;
 import com.transaction.common.bean.ResponseBean;
 import com.transaction.common.dto.PaginationRequest;
 import com.transaction.common.dto.PaginationResponse;
-import com.transaction.common.exception.CustomerException;
+import com.transaction.common.exception.CustomException;
 import com.transaction.dao.CustomerDao;
 import com.transaction.service.CustomerService;
 import com.transaction.util.StringUtils;
@@ -20,7 +20,7 @@ public class CustomerServiceImpl implements CustomerService {
             validateCustomer(customer);
             Customer inserted = CustomerDao.create(customer);
             return new ResponseBean<>(0, "Success", inserted);
-        } catch (CustomerException e) {
+        } catch (CustomException e) {
             return new ResponseBean<>(1, e.getMessage());
         } catch (Exception e) {
             return new ResponseBean<>(1, e.getMessage());
@@ -31,14 +31,14 @@ public class CustomerServiceImpl implements CustomerService {
     public ResponseBean<Customer> update(Customer customer, Integer id) {
         try {
             if (Objects.isNull(id))
-                throw new CustomerException("Id cannot be null , to check existing record");
+                throw new CustomException("Id cannot be null , to check existing record");
             Customer byId = CustomerDao.getById(id);
             if (Objects.isNull(byId))
-                throw new CustomerException("Record not found with given id");
+                throw new CustomException("Record not found with given id");
             validateCustomer(customer);
             Customer update = CustomerDao.update(customer, id);
             return new ResponseBean<>(0, "Success", update);
-        } catch (CustomerException e) {
+        } catch (CustomException e) {
             return new ResponseBean<>(1, e.getMessage());
         } catch (Exception e) {
             return new ResponseBean<>(1, e.getMessage());
@@ -49,13 +49,13 @@ public class CustomerServiceImpl implements CustomerService {
     public ResponseBean<Customer> delete(Integer id) {
         try {
             if (Objects.isNull(id))
-                throw new CustomerException("Id cannot be null");
+                throw new CustomException("Id cannot be null");
             Customer customer = CustomerDao.getById(id);
             if (Objects.isNull(customer))
-                throw new CustomerException("Customer Not Found with given Id");
+                throw new CustomException("Customer Not Found with given Id");
             CustomerDao.delete(id);
             return new ResponseBean<>(0, "Success", customer);
-        } catch (CustomerException e) {
+        } catch (CustomException e) {
             return new ResponseBean<>(1, e.getMessage());
         } catch (Exception e) {
             return new ResponseBean<>(1, e.getMessage());
@@ -66,10 +66,10 @@ public class CustomerServiceImpl implements CustomerService {
     public ResponseBean<Customer> getById(Integer id) {
         try {
             if (Objects.isNull(id))
-                throw new CustomerException("id cannot be null");
+                throw new CustomException("id cannot be null");
             Customer customer = CustomerDao.getById(id);
             return new ResponseBean<>(0, "Success", customer);
-        } catch (CustomerException e) {
+        } catch (CustomException e) {
             return new ResponseBean<>(1, e.getMessage());
         } catch (Exception e) {
             return new ResponseBean<>(1, e.getMessage());
@@ -91,7 +91,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             PaginationResponse paginationResponse = CustomerDao.getAllWithPagination(paginationRequest);
             return new ResponseBean<>(0, "Success", paginationResponse);
-        } catch (CustomerException e) {
+        } catch (CustomException e) {
             return new ResponseBean<>(1, e.getMessage());
         } catch (Exception e) {
             return new ResponseBean<>(1, e.getMessage());
@@ -100,18 +100,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void validateCustomer(Customer customer) {
         if (Objects.isNull(customer))
-            throw new CustomerException("Customer cannot be null");
+            throw new CustomException("Customer cannot be null");
         if (StringUtils.isEmptyOrNull(customer.getContactNumber()))
-            throw new CustomerException("First Name  cannot be Null");
+            throw new CustomException("First Name  cannot be Null");
         if (StringUtils.isEmptyOrNull(customer.getLastName()))
-            throw new CustomerException("Last cannot be null");
+            throw new CustomException("Last cannot be null");
         if (StringUtils.isEmptyOrNull(customer.getAddress()))
-            throw new CustomerException("Address cannot be null");
+            throw new CustomException("Address cannot be null");
         if (StringUtils.isEmptyOrNull(customer.getCity()))
-            throw new CustomerException("city cannot be null");
+            throw new CustomException("city cannot be null");
         if (StringUtils.isEmptyOrNull(customer.getState()))
-            throw new CustomerException("State cannot be null");
+            throw new CustomException("State cannot be null");
         if (StringUtils.isEmptyOrNull(customer.getContactNumber()))
-            throw new CustomerException("contact number cannot be null");
+            throw new CustomException("contact number cannot be null");
     }
 }

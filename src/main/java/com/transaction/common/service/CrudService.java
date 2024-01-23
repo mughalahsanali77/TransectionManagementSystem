@@ -1,4 +1,4 @@
-package com.transaction.service;
+package com.transaction.common.service;
 
 import com.transaction.common.bean.ResponseBean;
 import com.transaction.common.dto.PaginationRequest;

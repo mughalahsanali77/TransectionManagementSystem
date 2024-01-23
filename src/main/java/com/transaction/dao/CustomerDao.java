@@ -3,7 +3,7 @@ package com.transaction.dao;
 import com.transaction.bean.Customer;
 import com.transaction.common.dto.PaginationRequest;
 import com.transaction.common.dto.PaginationResponse;
-import com.transaction.common.exception.CustomerException;
+import com.transaction.common.exception.CustomException;
 import com.transaction.util.ConnectionProvider;
 import java.sql.*;
 import java.util.ArrayList;
@@ -119,7 +119,7 @@ public class CustomerDao {
         List<Customer> customers=new ArrayList<>();
         Integer totalPages=totalPages(getTotalRecords(),page.getItemsPerPage());
         if (page.getCurrentPage()>totalPages){
-           throw new CustomerException("CURRENT PAGE IS GREATER THEN THE COUNT OF TOTAL PAGES\\nONLY \"+totalPages+\" EXIST");
+           throw new CustomException("CURRENT PAGE IS GREATER THEN THE COUNT OF TOTAL PAGES\\nONLY \"+totalPages+\" EXIST");
         }else {
             Integer offset=page.getCurrentPage()*page.getItemsPerPage();
             String sql="SELECT CUSTOMER_ID,FIRST_NAME,LAST_NAME,CITY,STATE,ADDRESS,CONTACT_NUMBER " +

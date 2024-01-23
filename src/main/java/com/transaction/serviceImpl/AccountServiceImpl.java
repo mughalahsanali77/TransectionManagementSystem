@@ -53,18 +53,21 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public ResponseBean<Account> delete(String accountNo) {
-        /*try {
+        try {
+            Account account=new Account();
             ResponseBean<Account> byId = getById(accountNo);
             if (Objects.nonNull(byId.getData())){
-                Account account = AccountDao.deleteAccount(byId.getData());
+                account = AccountDao.deleteAccount(byId.getData());
+            }else {
+                return null; //because response is given from getById
             }
+            return new ResponseBean<>(0,"Success",account);
 
         }catch (CustomException e){
             return new ResponseBean<>(1, e.getMessage());
         }catch (Exception e){
             return new ResponseBean<>(1, e.getMessage());
-        }*/
-        return null;
+        }
     }
 
     @Override
@@ -83,12 +86,22 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public ResponseBean<List<Account>> get() {
-        return null;
+        try{
+            List<Account> accounts=AccountDao.getAll();
+            return new ResponseBean<>(0,"Success",accounts);
+        }catch (Exception e){
+            return new ResponseBean<>(1,e.getMessage());
+        }
     }
 
     @Override
     public ResponseBean<PaginationResponse> get(PaginationRequest paginationRequest) {
-        return null;
+        try {
+            PaginationResponse paginationResponse=AccountDao.getAllWithPagination(paginationRequest);
+            return new  ResponseBean<>(0,"Success",paginationResponse);
+        }catch (Exception e){
+            return new ResponseBean<>(1, e.getMessage());
+        }
     }
     
     private void validateAccount(Account account){

@@ -2,7 +2,11 @@ package com.transaction.dao;
 
 import com.transaction.bean.Account;
 import com.transaction.bean.Customer;
+import com.transaction.common.dto.PaginationRequest;
+import com.transaction.common.dto.PaginationResponse;
+import com.transaction.common.exception.CustomException;
 import com.transaction.util.ConnectionProvider;
+import com.transaction.util.PaginationUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -168,6 +172,38 @@ public class AccountDao {
         }finally {
             ConnectionProvider.closeConnection();
         }
+    }
+
+    public static PaginationResponse getAllWithPagination(PaginationRequest request){
+        Long totalRecords= PaginationUtils.getTotalRecords("ACCOUNT");
+        Integer totalPages=PaginationUtils.totalPages(totalRecords,request.getItemsPerPage());
+        if (request.getCurrentPage()>totalPages)
+                 throw new CustomException("Current Page Exceed Total Page Limit");
+        else {
+            String sql="SELECT A.ACCOUNT_NO,A.PIN_CODE,A.DATE_OF_CREATE,A.ACCOUNT_TYPE,A.AMOUNT," +
+                    "C.CUSTOMER_ID ,C.FIRST_NAME,C.LAST_NAME,C.CITY,C.STATE,C.ADDRESS,C.CONTACT_NUMBER" +
+                    "FROM ACCOUNT A " +
+                    "JOIN CUSTOMER C " +
+                    "ON A.CUSTOMER_ID = C.CUSTOMER_ID " +
+                    " ORDER BY ? ? LIMIT ? OFFSET ?";
+            try (Connection connection=ConnectionProvider.getConnection();
+            PreparedStatement preparedStatement=connection.prepareStatement(sql)){
+                PaginationUtils.setPaginationRequestParameter(preparedStatement,request);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<Account>accounts=new ArrayList<>();
+                while (resultSet.next()){
+                    Account account=getAccountFromResultSet(resultSet);
+                    accounts.add(account);
+                }
+                return new PaginationResponse(totalRecords,totalPages,accounts);
+            }catch (Exception e ){
+                System.err.println("Error occurred:"+e.getMessage());
+                return null;
+            }finally {
+                ConnectionProvider.closeConnection();
+            }
+        }
+
     }
     private static Account getAccountFromResultSet(ResultSet resultSet) throws SQLException {
         Customer customer=CustomerDao.createCustomerFromResultSet(resultSet);

@@ -5,6 +5,8 @@ import com.transaction.common.dto.PaginationRequest;
 import com.transaction.common.dto.PaginationResponse;
 import com.transaction.common.exception.CustomException;
 import com.transaction.util.ConnectionProvider;
+import com.transaction.util.PaginationUtils;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,25 +119,22 @@ public class CustomerDao {
 
     public static PaginationResponse getAllWithPagination(PaginationRequest page){
         List<Customer> customers=new ArrayList<>();
-        Integer totalPages=totalPages(getTotalRecords(),page.getItemsPerPage());
+        Long totalRecords=PaginationUtils.getTotalRecords("CUSTOMER");
+        Integer totalPages= PaginationUtils.totalPages(totalRecords,page.getItemsPerPage());
         if (page.getCurrentPage()>totalPages){
            throw new CustomException("CURRENT PAGE IS GREATER THEN THE COUNT OF TOTAL PAGES\\nONLY \"+totalPages+\" EXIST");
         }else {
-            Integer offset=page.getCurrentPage()*page.getItemsPerPage();
             String sql="SELECT CUSTOMER_ID,FIRST_NAME,LAST_NAME,CITY,STATE,ADDRESS,CONTACT_NUMBER " +
                     "FROM CUSTOMER ORDER BY ? ? LIMIT ? OFFSET ?";
             try(Connection connection=ConnectionProvider.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
-                preparedStatement.setString(1,page.getSortBy());
-                preparedStatement.setString(2,page.getDirection());
-                preparedStatement.setInt(3,page.getItemsPerPage());
-                preparedStatement.setInt(4,offset);
+                PaginationUtils.setPaginationRequestParameter(preparedStatement,page);
                 ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()){
                     Customer customer=createCustomerFromResultSet(resultSet);
                     customers.add(customer);
                 }
-                return  new PaginationResponse(getTotalRecords().longValue(),totalPages,customers);
+                return  new PaginationResponse(totalRecords,totalPages,customers);
             }catch (SQLException e) {
                 System.err.println("Error occurred : " + e.getMessage());
                 return null;
@@ -145,29 +144,6 @@ public class CustomerDao {
         }
 
     }
-
-    private static Integer totalPages(Integer totalRecords,Integer itemsPerPage){
-        return totalRecords/itemsPerPage;
-    }
-    private static Integer getTotalRecords(){
-        String sql="SELECT COUNT(*) FROM CUSTOMER";
-        Integer totalRecords=null;
-        try(Connection connection=ConnectionProvider.getConnection();
-            Statement statement=connection.createStatement();
-            ResultSet resultSet=statement.executeQuery(sql)) {
-            if (resultSet.next()){
-                totalRecords=resultSet.getInt(1);
-            }else {
-                System.err.println("Result Set have nothing");
-            }
-        }catch (SQLException e){
-            System.err.println("Error occurred : "+ e.getMessage());
-        }finally {
-            ConnectionProvider.closeConnection();
-        }
-        return totalRecords;
-    }
-
 
     private static void setCustomerParameters(PreparedStatement preparedStatement, Customer customer) throws SQLException {
         preparedStatement.setString(1, customer.getFirstName());

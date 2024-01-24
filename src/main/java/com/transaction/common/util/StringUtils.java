@@ -1,4 +1,4 @@
-package com.transaction.util;
+package com.transaction.common.util;
 
 public class StringUtils {
 

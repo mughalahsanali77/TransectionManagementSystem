@@ -7,7 +7,7 @@ import com.transaction.common.dto.PaginationResponse;
 import com.transaction.common.exception.CustomException;
 import com.transaction.dao.CustomerDao;
 import com.transaction.service.CustomerService;
-import com.transaction.util.StringUtils;
+import com.transaction.common.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;

@@ -4,8 +4,8 @@ import com.transaction.bean.Customer;
 import com.transaction.common.dto.PaginationRequest;
 import com.transaction.common.dto.PaginationResponse;
 import com.transaction.common.exception.CustomException;
-import com.transaction.util.ConnectionProvider;
-import com.transaction.util.PaginationUtils;
+import com.transaction.helper.ConnectionProvider;
+import com.transaction.common.util.PaginationUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class CustomerDao {
         try (Connection connection = ConnectionProvider.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
             int i = preparedStatement.executeUpdate();
-            if (i<=0){
+            if (i <= 0) {
                 throw new SQLException("Failed to delete");
             }
         } catch (SQLException e) {
@@ -99,46 +99,46 @@ public class CustomerDao {
     public static Customer update(Customer customer, Integer id) {
         String sql = "UPDATE CUSTOMER SET FIRST_NAME=?,LAST_NAME=?,CITY=?,STATE=?,ADDRESS=?,CONTACT_NUMBER=? WHERE CUSTOMER_ID=?";
         try (Connection connection = ConnectionProvider.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             setCustomerParameters(preparedStatement, customer);
             preparedStatement.setInt(7, id);
             int i = preparedStatement.executeUpdate();
-            if (i>0){
+            if (i > 0) {
                 customer.setCustomerId(id);
-            }else {
+            } else {
                 throw new SQLException("Failed to Update");
             }
         } catch (SQLException e) {
             System.err.println("Error occurred :" + e.getMessage());
-            customer=null;
-        }finally {
+            customer = null;
+        } finally {
             ConnectionProvider.closeConnection();
         }
         return customer;
     }
 
-    public static PaginationResponse getAllWithPagination(PaginationRequest page){
-        List<Customer> customers=new ArrayList<>();
-        Long totalRecords=PaginationUtils.getTotalRecords("CUSTOMER");
-        Integer totalPages= PaginationUtils.totalPages(totalRecords,page.getItemsPerPage());
-        if (page.getCurrentPage()>totalPages){
-           throw new CustomException("CURRENT PAGE IS GREATER THEN THE COUNT OF TOTAL PAGES\\nONLY \"+totalPages+\" EXIST");
-        }else {
-            String sql="SELECT CUSTOMER_ID,FIRST_NAME,LAST_NAME,CITY,STATE,ADDRESS,CONTACT_NUMBER " +
+    public static PaginationResponse getAllWithPagination(PaginationRequest page) {
+        List<Customer> customers = new ArrayList<>();
+        Long totalRecords = PaginationUtils.getTotalRecords("CUSTOMER");
+        Integer totalPages = PaginationUtils.totalPages(totalRecords, page.getItemsPerPage());
+        if (page.getCurrentPage() > totalPages) {
+            throw new CustomException("CURRENT PAGE IS GREATER THEN THE COUNT OF TOTAL PAGES\\nONLY \"+totalPages+\" EXIST");
+        } else {
+            String sql = "SELECT CUSTOMER_ID,FIRST_NAME,LAST_NAME,CITY,STATE,ADDRESS,CONTACT_NUMBER " +
                     "FROM CUSTOMER ORDER BY ? ? LIMIT ? OFFSET ?";
-            try(Connection connection=ConnectionProvider.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
-                PaginationUtils.setPaginationRequestParameter(preparedStatement,page);
+            try (Connection connection = ConnectionProvider.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+                PaginationUtils.setPaginationRequestParameter(preparedStatement, page);
                 ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()){
-                    Customer customer=createCustomerFromResultSet(resultSet);
+                while (resultSet.next()) {
+                    Customer customer = createCustomerFromResultSet(resultSet);
                     customers.add(customer);
                 }
-                return  new PaginationResponse(totalRecords,totalPages,customers);
-            }catch (SQLException e) {
+                return new PaginationResponse(totalRecords, totalPages, customers);
+            } catch (SQLException e) {
                 System.err.println("Error occurred : " + e.getMessage());
                 return null;
-            }finally {
+            } finally {
                 ConnectionProvider.closeConnection();
             }
         }

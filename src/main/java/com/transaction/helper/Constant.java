@@ -1,4 +1,4 @@
-package com.transaction.util;
+package com.transaction.helper;
 
 public class Constant {
     public static final String DATABASE_URL="jdbc:mysql://localhost:3306/TRANSACTION_MANAGEMENT_SYSTEM";

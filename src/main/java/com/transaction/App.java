@@ -1,7 +1,9 @@
 package com.transaction;
 
 import com.transaction.bean.Account;
+import com.transaction.bean.Transaction;
 import com.transaction.dao.AccountDao;
+import com.transaction.dao.TransactionDao;
 
 import java.util.Objects;
 
@@ -37,10 +39,10 @@ public class App {
 //            System.out.println(account.toString());
 
         ///after using join
-        Account account=AccountDao.getAccountByAccountNoAndPinCode("ACCOUNT-1",1234);
-        if (Objects.nonNull(account)){
-            System.out.println(account.getAccountNoPinCodeCustomer());
-        }
+//        Account account=AccountDao.getAccountByAccountNoAndPinCode("ACCOUNT-1",1234);
+//        if (Objects.nonNull(account)){
+//            System.out.println(account.getAccountNoPinCodeCustomer());
+//        }
 
 //        Account account=AccountDao.getByAccountNumber("ACCOUNT-1");
 //        if (Objects.nonNull(account)){
@@ -74,6 +76,12 @@ public class App {
 //            System.out.println(acc.toString());
 //            System.out.println("-------------------------------------");
 //        }
+
+//        Transaction transaction= TransactionDao.getByTrxId("1");
+//        if (transaction!=null)
+//            System.out.println(transaction.toString());
+
+
 
     }
 

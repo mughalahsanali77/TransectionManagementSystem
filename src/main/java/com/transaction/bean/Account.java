@@ -1,7 +1,6 @@
 package com.transaction.bean;
 
-import com.mysql.cj.util.StringUtils;
-import com.transaction.util.Utils;
+import com.transaction.common.util.Utils;
 
 import java.util.Date;
 import java.util.Objects;
@@ -98,7 +97,7 @@ public class Account {
         return customer;
     }
 
-    public void setCustomerId(Customer customer) {
+    public void setCustomer(Customer customer) {
         this.customer = customer;
     }
 

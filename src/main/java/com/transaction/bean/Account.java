@@ -25,6 +25,14 @@ public class Account {
         this.amount = amount;
         this.customer=customer;
     }
+
+    public Account(Integer pinCode, String accountType, Long amount, Customer customer) {
+        this.pinCode = pinCode;
+        this.accountType = accountType;
+        this.amount = amount;
+        this.customer = customer;
+    }
+
     public Account(String accountNo, Integer pinCode, Date dateOfCreate, String accountType, Long amount, Integer customerId) {
         this.accountNo = accountNo;
         this.pinCode = pinCode;

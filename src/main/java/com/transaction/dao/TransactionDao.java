@@ -11,6 +11,7 @@ import com.transaction.helper.ConnectionProvider;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TransactionDao {
@@ -18,9 +19,9 @@ public class TransactionDao {
     public static Transaction get(String trxId) {
         Transaction transaction = new Transaction();
         String sql = "SELECT T.TRX_ID AS TRANSACTION_ID, T.AMOUNT AS TRANSACTION_AMOUNT , T.DATE_OF_TRANSFER AS TRANSACTION_DATE_OF_TRANSFER," +
-                "SENDER_ACCOUNT.ACCOUNT_NO AS SENDER_ACCOUNT_NUMBER ,SENDER_ACCOUNT.ACCOUNT_TYPE AS SENDER_ACCOUNT_TYPE," +
+                "SENDER_ACCOUNT.ACCOUNT_NO AS SENDER_ACCOUNT_NUMBER ,SENDER_ACCOUNT.ACCOUNT_TYPE AS SENDER_ACCOUNT_TYPE, SENDER_ACCOUNT.AMOUNT AS SENDER_ACCOUNT_AMOUNT," +
                 "SENDER_CUSTOMER.CUSTOMER_ID AS SENDER_CUSTOMER_ID ,SENDER_CUSTOMER.FIRST_NAME SENDER_NAME,SENDER_CUSTOMER.CONTACT_NUMBER AS SENDER_CONTACT," +
-                "RECEIVER_ACCOUNT.ACCOUNT_NO AS RECEIVER_ACCOUNT_NUMBER , RECEIVER_ACCOUNT.ACCOUNT_TYPE AS RECEIVER_ACCOUNT_TYPE," +
+                "RECEIVER_ACCOUNT.ACCOUNT_NO AS RECEIVER_ACCOUNT_NUMBER , RECEIVER_ACCOUNT.ACCOUNT_TYPE AS RECEIVER_ACCOUNT_TYPE, RECEIVER_ACCOUNT.AMOUNT AS RECEIVER_ACCOUNT_AMOUNT," +
                 "RECEIVER_CUSTOMER.CUSTOMER_ID AS RECEIVER_CUSTOMER_ID,RECEIVER_CUSTOMER.FIRST_NAME AS RECEIVER_NAME,RECEIVER_CUSTOMER.CONTACT_NUMBER AS RECEIVER_CONTACT" +
                 " FROM TRANSACTION T " +
                 "JOIN ACCOUNT AS SENDER_ACCOUNT ON T.SENDER_ACCOUNT_NUMBER = SENDER_ACCOUNT.ACCOUNT_NO " +
@@ -86,6 +87,7 @@ public class TransactionDao {
         Account senderAccount = new Account();
         senderAccount.setAccountNo(resultSet.getString("SENDER_ACCOUNT_NUMBER"));
         senderAccount.setAccountType(resultSet.getString("SENDER_ACCOUNT_TYPE"));
+        senderAccount.setAmount(resultSet.getLong("SENDER_ACCOUNT_AMOUNT"));
 
         Customer senderCustomer = new Customer();
         senderCustomer.setCustomerId(resultSet.getInt("SENDER_CUSTOMER_ID"));
@@ -96,6 +98,7 @@ public class TransactionDao {
         Account receiverAccount = new Account();
         receiverAccount.setAccountNo(resultSet.getString("RECEIVER_ACCOUNT_NUMBER"));
         receiverAccount.setAccountType(resultSet.getString("RECEIVER_ACCOUNT_TYPE"));
+        receiverAccount.setAmount(resultSet.getLong("RECEIVER_ACCOUNT_AMOUNT"));
 
         Customer receiverCustomer = new Customer();
         receiverCustomer.setCustomerId(resultSet.getInt("RECEIVER_CUSTOMER_ID"));
@@ -109,6 +112,47 @@ public class TransactionDao {
                 senderAccount,
                 receiverAccount
         );
+    }
+
+
+    public static Transaction create(Transaction transaction){
+        String sql="INSERT INTO " +
+                "TRANSACTION(TRX_ID,DATE_OF_TRANSFER,AMOUNT,SENDER_ACCOUNT_NUMBER,RECEIVER_ACCOUNT_NUMBER)" +
+                "values (?,?,?,?,?)";
+        try(Connection connection=ConnectionProvider.getConnection();
+        PreparedStatement preparedStatement=connection.prepareStatement(sql)) {
+            preparedStatement.setString(1,transaction.getTrxId());
+            preparedStatement.setTimestamp(2, new Timestamp(transaction.getDateOfTransfer().getTime()));
+            preparedStatement.setLong(3,transaction.getAmount());
+            preparedStatement.setString(4,transaction.getSenderAccount().getAccountNo());
+            preparedStatement.setString(5,transaction.getSenderAccount().getAccountNo());
+            int i = preparedStatement.executeUpdate();
+            if (1>0){
+                return get(transaction.getTrxId());
+            }
+        }catch (SQLException e){
+            System.err.println("Error occurred : "+e.getMessage());
+        }finally {
+            ConnectionProvider.closeConnection();
+        }
+        return null;
+    }
+    public static Long getCountOfTransactionsByDate(Date date){
+        String sql="SELECT COUNT(*) AS TRANSACTIONS_COUNT FROM TRANSACTION WHERE DATE(DATE_OF_TRANSFER)=? ";
+        java.sql.Date sqlDate=new java.sql.Date(date.getTime());
+        try (Connection connection=ConnectionProvider.getConnection();
+        PreparedStatement preparedStatement=connection.prepareStatement(sql)){
+            preparedStatement.setDate(1,sqlDate);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()){
+                return resultSet.getLong("TRANSACTIONS_COUNT");
+            }
+        }catch (SQLException e){
+            System.err.println("Error Occurred : "+e.getMessage());
+        }finally {
+            ConnectionProvider.closeConnection();
+        }
+        return null;
     }
 
     private static List<Transaction> getListFromResultSet(ResultSet resultSet) throws SQLException {

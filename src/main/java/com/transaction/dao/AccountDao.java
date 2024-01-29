@@ -177,6 +177,38 @@ public class AccountDao {
         }
     }
 
+    public static List<Account>  updateAmount(String senderAccountNo,String receiverAccountNo,Long amount){
+        String sql="UPDATE ACCOUNT SET AMOUNT = CASE " +
+                "WHEN ACCOUNT_NO =? THEN (AMOUNT-?) " +
+                "WHEN ACCOUNT_NO =? THEN (AMOUNT+?) " +
+                "END " +
+                "WHERE ACCOUNT_NO IN(?,?)";
+        try (Connection connection=ConnectionProvider.getConnection();
+        PreparedStatement preparedStatement= connection.prepareStatement(sql)){
+            preparedStatement.setString(1,senderAccountNo);
+            preparedStatement.setLong(2,amount);
+            preparedStatement.setString(3,receiverAccountNo);
+            preparedStatement.setLong(4,amount);
+            preparedStatement.setString(5,senderAccountNo);
+            preparedStatement.setString(6,receiverAccountNo);
+
+            int update = preparedStatement.executeUpdate();
+            if (update>0){
+                Account sender = getByAccountNumber(senderAccountNo);
+                Account receiver=getByAccountNumber(receiverAccountNo);
+                List<Account> updatedAccounts = new ArrayList<>();
+                updatedAccounts.add(sender);
+                updatedAccounts.add(receiver);
+                return updatedAccounts;
+            }
+        }catch (SQLException e){
+            System.err.println("Error Occurred : "+e.getMessage());
+        }finally {
+            ConnectionProvider.closeConnection();
+        }
+        return null;
+    }
+
     public static PaginationResponse getAllWithPagination(PaginationRequest request) {
         Long totalRecords = PaginationUtils.getTotalRecords("ACCOUNT");
         Integer totalPages = PaginationUtils.totalPages(totalRecords, request.getItemsPerPage());
@@ -230,6 +262,26 @@ public class AccountDao {
         } finally {
             ConnectionProvider.closeConnection();
         }
+    }
+
+    public static Long getAccountsCountByDate(java.util.Date date){
+        System.out.println(date);
+        String sql="SELECT COUNT(*) AS ACCOUNT_COUNT FROM ACCOUNT WHERE DATE_OF_CREATE=?";
+        java.sql.Date sqlDate=new Date(date.getTime());
+        System.out.println(sqlDate);
+        try (Connection connection=ConnectionProvider.getConnection();
+        PreparedStatement preparedStatement=connection.prepareStatement(sql)){
+            preparedStatement.setDate(1,sqlDate);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()){
+                return resultSet.getLong("ACCOUNT_COUNT");
+            }
+        }catch (SQLException e){
+            System.err.println("Error occurred : "+e.getMessage());
+        }finally {
+            ConnectionProvider.closeConnection();
+        }
+        return null;
     }
 
     private static Account getAccountFromResultSet(ResultSet resultSet) throws SQLException {

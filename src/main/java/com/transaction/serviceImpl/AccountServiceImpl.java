@@ -5,6 +5,7 @@ import com.transaction.common.bean.ResponseBean;
 import com.transaction.common.dto.PaginationRequest;
 import com.transaction.common.dto.PaginationResponse;
 import com.transaction.common.exception.CustomException;
+import com.transaction.common.util.DateUtils;
 import com.transaction.dao.AccountDao;
 import com.transaction.service.AccountService;
 import com.transaction.common.util.StringUtils;
@@ -18,10 +19,8 @@ public class AccountServiceImpl implements AccountService {
     public ResponseBean<Account> create(Account account) {
         try {
             validateAccount(account);
-/*
-            have to implement and set ACCOUNT-COUNTER-CURRENT_DATE
-            account.setAccountNo();
-*/
+            Long counter=AccountDao.getAccountsCountByDate(new Date());
+            account.setAccountNo("ACCOUNT-"+(++counter)+"-"+ DateUtils.formatDate(new Date()));
             account.setDateOfCreate(new Date());
             Account created = AccountDao.create(account);
             return new ResponseBean<>(0, "SUCCESS", created);

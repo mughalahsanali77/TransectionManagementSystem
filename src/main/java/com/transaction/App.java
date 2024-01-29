@@ -1,10 +1,19 @@
 package com.transaction;
 
 import com.transaction.bean.Account;
+import com.transaction.bean.Customer;
 import com.transaction.bean.Transaction;
+import com.transaction.common.bean.ResponseBean;
+import com.transaction.common.util.DateUtils;
 import com.transaction.dao.AccountDao;
+import com.transaction.dao.CustomerDao;
 import com.transaction.dao.TransactionDao;
+import com.transaction.service.AccountService;
+import com.transaction.service.TransactionService;
+import com.transaction.serviceImpl.AccountServiceImpl;
+import com.transaction.serviceImpl.TransactionServiceImpl;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -81,8 +90,23 @@ public class App {
 //        if (transaction!=null)
 //            System.out.println(transaction.toString());
 
+//        Customer customer= CustomerDao.getById(6);
+//        AccountService accountService=new AccountServiceImpl();
+//        ResponseBean<Account> responseBean = accountService.create(new Account(1234, "DEBIT", 4000L, customer));
+//        System.out.println(responseBean);
+
+        Transaction transaction=new Transaction();
+        transaction.setAmount(20L);
+        transaction.setSenderAccount(AccountDao.getByAccountNumber("ACCOUNT-1"));
+        transaction.setReceiverAccount(AccountDao.getByAccountNumber("ACCOUNT-2"));
+
+        TransactionService transactionService=new TransactionServiceImpl();
+        ResponseBean<Transaction> responseBean = transactionService.create(transaction);
+        System.out.println(responseBean);
 
 
     }
+
+
 
 }
